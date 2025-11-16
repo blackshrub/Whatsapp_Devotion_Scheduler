@@ -4,41 +4,25 @@ import { Bold, Italic, List } from 'lucide-react';
 
 export const SimpleEditor = ({ initialContent = '', onChange }) => {
   const editorRef = useRef(null);
-  const isInitialized = useRef(false);
 
-  // Set initial content only once
+  // Set initial content only once on mount
   useEffect(() => {
-    if (editorRef.current && !isInitialized.current) {
-      editorRef.current.innerHTML = initialContent || '<p>Enter your devotion message here...</p>';
-      isInitialized.current = true;
+    if (editorRef.current && !editorRef.current.innerHTML) {
+      const content = initialContent || 'Enter your devotion message here...';
+      editorRef.current.innerHTML = content;
     }
-  }, []);
+  }, [initialContent]);
 
   const handleFormat = (command) => {
-    document.execCommand(command, false, null);
     editorRef.current?.focus();
-    // Trigger change after formatting
+    document.execCommand(command, false, null);
     handleInput();
   };
 
   const handleInput = () => {
-    const html = editorRef.current?.innerHTML || '';
-    onChange?.(html);
-  };
-
-  const handleKeyDown = (e) => {
-    // Ensure Enter key works properly
-    if (e.key === 'Enter') {
-      // Let default behavior handle it, but ensure we're not in a list
-      const selection = window.getSelection();
-      if (selection && selection.anchorNode) {
-        const parentElement = selection.anchorNode.parentElement;
-        // If not in a list, insert a line break
-        if (!parentElement?.closest('ul') && !parentElement?.closest('ol')) {
-          e.preventDefault();
-          document.execCommand('insertLineBreak', false, null);
-        }
-      }
+    if (editorRef.current) {
+      const html = editorRef.current.innerHTML;
+      onChange?.(html);
     }
   };
 
@@ -78,12 +62,11 @@ export const SimpleEditor = ({ initialContent = '', onChange }) => {
       {/* Editable Content */}
       <div
         ref={editorRef}
-        contentEditable
-        className="border border-[color:var(--border)] rounded-lg p-3 bg-white min-h-[150px] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary-600)]"
+        contentEditable="true"
+        className="border border-[color:var(--border)] rounded-lg p-3 bg-white min-h-[150px] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary-600)] whitespace-pre-wrap"
         onInput={handleInput}
-        onKeyDown={handleKeyDown}
         data-testid="schedule-message-editor"
-        suppressContentEditableWarning
+        suppressContentEditableWarning={true}
       />
       
       <p className="text-xs text-[color:var(--fg-muted)]">
