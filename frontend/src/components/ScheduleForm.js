@@ -37,14 +37,16 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
     setLoading(true);
 
     try {
-      let imagePath = editData?.image_path || null;
+      let imageBase64 = editData?.image_base64 || null;
+      let imageFilename = editData?.image_filename || null;
 
       // Upload image if new one selected
       if (formData.image) {
         const imageFormData = new FormData();
         imageFormData.append('file', formData.image);
         const uploadRes = await axios.post(`${BACKEND_URL}/api/uploads/image`, imageFormData);
-        imagePath = uploadRes.data.path;
+        imageBase64 = uploadRes.data.image_base64;
+        imageFilename = uploadRes.data.filename;
       }
 
       // Get HTML content from form data
@@ -63,7 +65,8 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
       const scheduleData = {
         phone: formData.phone,
         message_html: messageHtml,
-        image_path: imagePath,
+        image_base64: imageBase64,
+        image_filename: imageFilename,
         send_at: sendAt
       };
 
