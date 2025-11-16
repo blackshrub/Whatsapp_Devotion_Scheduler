@@ -32,7 +32,7 @@ export const SimpleEditor = ({ initialContent = '', onChange }) => {
   };
 
   const handleBold = () => {
-    wrapSelection('**', '**');
+    wrapSelection('*', '*');
   };
 
   const handleItalic = () => {
