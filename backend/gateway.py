@@ -37,6 +37,14 @@ class WhatsAppGateway:
     async def send_image_message(self, phone: str, image_path: str, caption: str = "") -> Dict[str, Any]:
         """Send image with optional caption via WhatsApp gateway"""
         try:
+            # Check if file exists
+            import os
+            if not os.path.exists(image_path):
+                logger.error(f"Image file not found: {image_path}")
+                return {"code": "ERROR", "message": f"Image file not found: {image_path}", "results": {}}
+            
+            logger.info(f"Sending image from path: {image_path} to {phone}")
+            
             async with httpx.AsyncClient(timeout=60.0) as client:
                 with open(image_path, 'rb') as f:
                     files = {'image': f}
@@ -53,7 +61,7 @@ class WhatsAppGateway:
                     response.raise_for_status()
                     return response.json()
         except Exception as e:
-            logger.error(f"Failed to send image message: {e}")
+            logger.error(f"Failed to send image message: {e}", exc_info=True)
             return {"code": "ERROR", "message": str(e), "results": {}}
 
 gateway = WhatsAppGateway()
