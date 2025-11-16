@@ -43,13 +43,14 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
         imagePath = uploadRes.data.path;
       }
 
-      // Combine date and time - user input is in GMT+7
-      // Parse as GMT+7 and convert to UTC for storage
-      const dateTimeString = `${formData.date}T${formData.time}:00`;
-      const localDate = new Date(dateTimeString);
+      // User input is always in GMT+7 (Asia/Jakarta time)
+      // Parse the date and time components
+      const [year, month, day] = formData.date.split('-').map(Number);
+      const [hours, minutes] = formData.time.split(':').map(Number);
       
-      // Calculate UTC by subtracting 7 hours (GMT+7 offset)
-      const utcDate = new Date(localDate.getTime() - (7 * 60 * 60 * 1000));
+      // Create date in GMT+7: construct UTC by treating input as GMT+7
+      // GMT+7 is UTC+7, so to convert to UTC we subtract 7 hours
+      const utcDate = new Date(Date.UTC(year, month - 1, day, hours - 7, minutes, 0));
       const sendAt = utcDate.toISOString();
 
       const scheduleData = {
