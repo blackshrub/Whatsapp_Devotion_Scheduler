@@ -143,6 +143,7 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
       <div>
         <Label htmlFor="message">Message</Label>
         <SimpleEditor
+          key={editorKey}
           initialContent={formData.message}
           onChange={handleEditorChange}
         />
