@@ -193,24 +193,6 @@ function App() {
             </div>
           </TabsContent>
 
-          {/* Editor Tab */}
-          <TabsContent value="editor">
-            <div className="bg-white rounded-lg border border-[color:var(--border)] p-6 shadow-sm max-w-4xl">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold font-display">Devotion Editor</h2>
-                <Button onClick={handleSaveFromEditor} disabled={loading} data-testid="editor-save-button">
-                  {loading ? 'Saving...' : 'Save Draft'}
-                </Button>
-              </div>
-              <DevotionEditor content={editorContent} onContentChange={setEditorContent} />
-              <div className="mt-4 p-4 bg-[color:var(--muted)] rounded-lg">
-                <p className="text-sm text-[color:var(--fg-muted)] mb-2">
-                  <strong>Tip:</strong> Use the Schedule tab to set a date and time for sending.
-                </p>
-              </div>
-            </div>
-          </TabsContent>
-
           {/* History Tab */}
           <TabsContent value="history">
             <div className="bg-white rounded-lg border border-[color:var(--border)] p-6 shadow-sm">
