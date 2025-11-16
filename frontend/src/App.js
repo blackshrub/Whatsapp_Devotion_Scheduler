@@ -167,12 +167,13 @@ function App() {
                           data-testid="schedule-item"
                         >
                           <div className="flex justify-between items-start">
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                               <div className="text-sm font-medium">
                                 {format(gmt7Date, 'MMM dd, yyyy HH:mm')} GMT+7
                               </div>
                               <div className="text-sm text-[color:var(--fg-muted)] truncate mt-1">
-                                {schedule.message_md || schedule.message_html}
+                                {(schedule.message_md || schedule.message_html).substring(0, 80)}
+                                {(schedule.message_md || schedule.message_html).length > 80 ? '...' : ''}
                               </div>
                             </div>
                             <Button
