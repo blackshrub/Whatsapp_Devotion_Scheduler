@@ -95,10 +95,14 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
         phone: '120363291513749102@g.us',
         date: '',
         time: '00:00',
-        message: '',
         image: null
       });
       setImagePreview(null);
+      
+      // Reset editor content
+      if (editor) {
+        editor.commands.setContent('<p>Enter your devotion message here...</p>');
+      }
 
       onSuccess?.();
     } catch (error) {
@@ -108,6 +112,8 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
       setLoading(false);
     }
   };
+
+  if (!editor) return null;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" data-testid="schedule-form">
