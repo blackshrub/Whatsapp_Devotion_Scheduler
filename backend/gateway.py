@@ -34,32 +34,36 @@ class WhatsAppGateway:
             logger.error(f"Failed to send text message: {e}")
             return {"code": "ERROR", "message": str(e), "results": {}}
     
-    async def send_image_message(self, phone: str, image_path: str, caption: str = "") -> Dict[str, Any]:
-        """Send image with optional caption via WhatsApp gateway"""
+    async def send_image_message(self, phone: str, image_bytes: bytes, filename: str, caption: str = "") -> Dict[str, Any]:
+        """Send image with optional caption via WhatsApp gateway
+        
+        Args:
+            phone: WhatsApp phone number
+            image_bytes: Image data as bytes (no filesystem required)
+            filename: Filename for the image
+            caption: Optional caption text
+        """
         try:
-            # Check if file exists
-            import os
-            if not os.path.exists(image_path):
-                logger.error(f"Image file not found: {image_path}")
-                return {"code": "ERROR", "message": f"Image file not found: {image_path}", "results": {}}
-            
-            logger.info(f"Sending image from path: {image_path} to {phone}")
+            logger.info(f"Sending image ({len(image_bytes)} bytes) to {phone}")
             
             async with httpx.AsyncClient(timeout=60.0) as client:
-                with open(image_path, 'rb') as f:
-                    files = {'image': f}
-                    data = {
-                        'phone': phone,
-                        'caption': caption
-                    }
-                    response = await client.post(
-                        f"{self.base_url}/send/image",
-                        files=files,
-                        data=data,
-                        auth=self._get_auth()
-                    )
-                    response.raise_for_status()
-                    return response.json()
+                # Create in-memory file-like object
+                from io import BytesIO
+                image_file = BytesIO(image_bytes)
+                
+                files = {'image': (filename, image_file, 'image/jpeg')}
+                data = {
+                    'phone': phone,
+                    'caption': caption
+                }
+                response = await client.post(
+                    f"{self.base_url}/send/image",
+                    files=files,
+                    data=data,
+                    auth=self._get_auth()
+                )
+                response.raise_for_status()
+                return response.json()
         except Exception as e:
             logger.error(f"Failed to send image message: {e}", exc_info=True)
             return {"code": "ERROR", "message": str(e), "results": {}}
