@@ -95,10 +95,11 @@ async def create_schedule(schedule_data: ScheduleCreate):
         # Convert HTML to markdown
         markdown = html_to_whatsapp_markdown(schedule_data.message_html)
         
-        schedule = Schedule(
-            **schedule_data.dict(),
-            message_md=markdown
-        )
+        # Create dict and set message_md
+        schedule_dict = schedule_data.dict()
+        schedule_dict['message_md'] = markdown
+        
+        schedule = Schedule(**schedule_dict)
         
         await db.schedules.insert_one(schedule.dict())
         return schedule
