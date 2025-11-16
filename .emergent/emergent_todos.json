@@ -1,14 +1,10 @@
 [
   {
-    "content": "Test gateway with text message to test phone (6281290080025)",
+    "content": "Test gateway with image message to test phone",
     "status": "completed"
   },
   {
-    "content": "Test gateway with image message to test phone",
-    "status": "in_progress"
-  },
-  {
     "content": "Test end-to-end scheduling and sending functionality",
-    "status": "pending"
+    "status": "in_progress"
   }
 ]
