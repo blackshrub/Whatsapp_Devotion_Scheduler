@@ -90,6 +90,7 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
         message: ''
       });
       setImagePreview(null);
+      setEditorKey(prev => prev + 1); // Force editor to reset
 
       onSuccess?.();
     } catch (error) {
