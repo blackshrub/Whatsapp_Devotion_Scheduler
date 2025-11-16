@@ -89,18 +89,6 @@ function App() {
     alert(`Phone: ${schedule.phone}\nMessage: ${schedule.message_md}\nStatus: ${schedule.status}`);
   };
 
-  const handleSaveFromEditor = async () => {
-    setLoading(true);
-    try {
-      // This would create a draft or allow scheduling
-      toast.info('Use the Schedule tab to set a date/time for this message');
-    } catch (error) {
-      toast.error('Failed to save');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[color:var(--bg)]" data-testid="page-dashboard">
       <Toaster position="top-right" />
