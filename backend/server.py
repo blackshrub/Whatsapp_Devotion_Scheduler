@@ -54,20 +54,23 @@ class DebugSendRequest(BaseModel):
 
 @api_router.post("/debug/send")
 async def debug_send(request: DebugSendRequest):
-    """Debug endpoint to test gateway"""
+    """Debug endpoint to test gateway - stateless, no filesystem"""
     import base64
-    temp_image_path = None
     
     try:
         if request.image_base64:
-            # Decode base64 and save to /tmp
+            # Decode base64 directly to bytes (no temp file)
             image_filename = request.image_filename or "debug_image.jpg"
-            temp_image_path = f"/tmp/{image_filename}"
-            image_data = base64.b64decode(request.image_base64)
-            with open(temp_image_path, 'wb') as f:
-                f.write(image_data)
+            image_bytes = base64.b64decode(request.image_base64)
             
-            result = await gateway.send_image_message(request.phone, temp_image_path, request.message)
+            logger.info(f"Debug: sending image ({len(image_bytes)} bytes) to {request.phone}")
+            
+            result = await gateway.send_image_message(
+                phone=request.phone,
+                image_bytes=image_bytes,
+                filename=image_filename,
+                caption=request.message
+            )
         else:
             result = await gateway.send_text_message(request.phone, request.message)
         
@@ -75,15 +78,6 @@ async def debug_send(request: DebugSendRequest):
     except Exception as e:
         logger.error(f"Debug send error: {e}")
         return {"success": False, "error": str(e)}
-    finally:
-        # Cleanup temp file
-        if temp_image_path:
-            try:
-                import os
-                if os.path.exists(temp_image_path):
-                    os.remove(temp_image_path)
-            except:
-                pass
 
 # Upload endpoint
 @api_router.post("/uploads/image")
