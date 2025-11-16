@@ -137,57 +137,10 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
 
       <div>
         <Label htmlFor="message">Message</Label>
-        <div className="space-y-2">
-          {/* Editor Toolbar */}
-          <div className="flex flex-wrap gap-1 p-2 bg-[color:var(--muted)] rounded-lg border border-[color:var(--border)]">
-            <Button
-              type="button"
-              size="sm"
-              variant={editor.isActive('bold') ? 'default' : 'ghost'}
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              data-testid="editor-bold-button"
-            >
-              <Bold className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant={editor.isActive('italic') ? 'default' : 'ghost'}
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              data-testid="editor-italic-button"
-            >
-              <Italic className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
-              onClick={() => editor.chain().focus().toggleBulletList().run()}
-              data-testid="editor-list-button"
-            >
-              <List className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant={editor.isActive('orderedList') ? 'default' : 'ghost'}
-              onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              data-testid="editor-ordered-list-button"
-            >
-              <ListOrdered className="h-4 w-4" />
-            </Button>
-          </div>
-          {/* Editor Content */}
-          <div
-            className="border border-[color:var(--border)] rounded-lg p-3 bg-white min-h-[150px]"
-            data-testid="schedule-message-editor"
-          >
-            <EditorContent editor={editor} />
-          </div>
-          <p className="text-xs text-[color:var(--fg-muted)]">
-            Format your message with bold, italic, and lists. It will be converted to WhatsApp markdown automatically.
-          </p>
-        </div>
+        <SimpleEditor
+          initialContent={formData.message}
+          onChange={handleEditorChange}
+        />
       </div>
 
       <div>
