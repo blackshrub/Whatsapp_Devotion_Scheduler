@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
-import { Upload, Trash2 } from 'lucide-react';
+import { Upload, Trash2, Bold, Italic, List, ListOrdered } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
