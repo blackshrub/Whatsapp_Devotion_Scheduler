@@ -43,8 +43,14 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
         imagePath = uploadRes.data.path;
       }
 
-      // Combine date and time to create send_at datetime
-      const sendAt = new Date(`${formData.date}T${formData.time}:00+07:00`).toISOString();
+      // Combine date and time - user input is in GMT+7
+      // Parse as GMT+7 and convert to UTC for storage
+      const dateTimeString = `${formData.date}T${formData.time}:00`;
+      const localDate = new Date(dateTimeString);
+      
+      // Calculate UTC by subtracting 7 hours (GMT+7 offset)
+      const utcDate = new Date(localDate.getTime() - (7 * 60 * 60 * 1000));
+      const sendAt = utcDate.toISOString();
 
       const scheduleData = {
         phone: formData.phone,
