@@ -71,9 +71,8 @@ class BackgroundWorker:
             logger.error(f"Error checking messages: {e}", exc_info=True)
     
     async def _send_schedule(self, schedule: dict):
-        """Send a single scheduled message"""
+        """Send a single scheduled message - completely stateless, no filesystem access"""
         schedule_id = schedule["id"]
-        temp_image_path = None
         
         try:
             # Update status to sending
@@ -93,28 +92,21 @@ class BackgroundWorker:
             image_base64 = schedule.get("image_base64")
             
             if image_base64:
-                # Decode base64 and write to /tmp
+                # Decode base64 to bytes in memory (NO filesystem)
                 import base64
-                import os
                 
                 image_filename = schedule.get("image_filename", f"{schedule_id}.jpg")
-                temp_image_path = f"/tmp/{image_filename}"
                 
-                # Decode and save to /tmp
-                image_data = base64.b64decode(image_base64)
-                with open(temp_image_path, 'wb') as f:
-                    f.write(image_data)
+                # Decode directly to bytes
+                image_bytes = base64.b64decode(image_base64)
                 
-                # Verify file was created
-                if not os.path.exists(temp_image_path):
-                    raise Exception(f"Failed to create temp image file: {temp_image_path}")
+                logger.info(f"Decoded image in memory ({len(image_bytes)} bytes) for {phone}")
                 
-                logger.info(f"Decoded image to {temp_image_path} ({len(image_data)} bytes)")
-                
-                # Send with image
+                # Send with image - passes bytes directly, no temp files
                 result = await gateway.send_image_message(
                     phone=phone,
-                    image_path=temp_image_path,
+                    image_bytes=image_bytes,
+                    filename=image_filename,
                     caption=message
                 )
             else:
