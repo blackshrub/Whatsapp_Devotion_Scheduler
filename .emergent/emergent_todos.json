@@ -1,0 +1,30 @@
+[
+  {
+    "content": "Install required backend dependencies (httpx for gateway API calls, APScheduler for scheduling)",
+    "status": "pending"
+  },
+  {
+    "content": "Install required frontend dependencies (lucide-react, framer-motion, sonner, date-fns, @tiptap/react, @tiptap/starter-kit, react-dropzone)",
+    "status": "pending"
+  },
+  {
+    "content": "Set up shadcn/ui components (Button, Input, Textarea, Select, Badge, Tabs, Table, Dialog, Sheet, Calendar, Tooltip) as .js files",
+    "status": "pending"
+  },
+  {
+    "content": "Create backend WhatsApp gateway client utility with send_message and send_image functions",
+    "status": "pending"
+  },
+  {
+    "content": "Add backend debug route /api/debug/send for testing gateway integration",
+    "status": "pending"
+  },
+  {
+    "content": "Test gateway with text message to test phone (6281290080025)",
+    "status": "pending"
+  },
+  {
+    "content": "Test gateway with image message to test phone",
+    "status": "pending"
+  }
+]
