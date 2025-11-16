@@ -1,10 +1,6 @@
 [
   {
-    "content": "Test gateway with image message to test phone",
-    "status": "completed"
-  },
-  {
     "content": "Test end-to-end scheduling and sending functionality",
-    "status": "in_progress"
+    "status": "completed"
   }
 ]
