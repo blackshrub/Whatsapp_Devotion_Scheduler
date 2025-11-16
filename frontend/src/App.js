@@ -121,10 +121,6 @@ function App() {
               <CalendarClock className="h-4 w-4 mr-2" />
               Schedule
             </TabsTrigger>
-            <TabsTrigger value="editor" data-testid="nav-editor">
-              <Edit3 className="h-4 w-4 mr-2" />
-              Editor
-            </TabsTrigger>
             <TabsTrigger value="history" data-testid="nav-history">
               <History className="h-4 w-4 mr-2" />
               History
