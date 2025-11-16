@@ -58,20 +58,7 @@ export const HistoryTable = ({ schedules, onRetry, onDelete, onView }) => {
                   {schedule.status}
                 </Badge>
               </TableCell>
-                <TableCell className="font-mono text-xs">
-                  {schedule.phone}
-                </TableCell>
-                <TableCell>
-                  <div className="max-w-xs truncate text-sm">
-                    {schedule.message_md || schedule.message_html}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={schedule.status} data-testid="history-status-badge">
-                    {schedule.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
+              <TableCell>
                   <div className="flex items-center gap-2">
                     {schedule.status === 'failed' && (
                       <Button
