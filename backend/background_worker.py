@@ -73,6 +73,7 @@ class BackgroundWorker:
     async def _send_schedule(self, schedule: dict):
         """Send a single scheduled message"""
         schedule_id = schedule["id"]
+        temp_image_path = None
         
         try:
             # Update status to sending
@@ -89,13 +90,31 @@ class BackgroundWorker:
             # Send the message
             phone = schedule["phone"]
             message = schedule.get("message_md", "")
-            image_path = schedule.get("image_path")
+            image_base64 = schedule.get("image_base64")
             
-            if image_path:
+            if image_base64:
+                # Decode base64 and write to /tmp
+                import base64
+                import os
+                
+                image_filename = schedule.get("image_filename", f"{schedule_id}.jpg")
+                temp_image_path = f"/tmp/{image_filename}"
+                
+                # Decode and save to /tmp
+                image_data = base64.b64decode(image_base64)
+                with open(temp_image_path, 'wb') as f:
+                    f.write(image_data)
+                
+                # Verify file was created
+                if not os.path.exists(temp_image_path):
+                    raise Exception(f"Failed to create temp image file: {temp_image_path}")
+                
+                logger.info(f"Decoded image to {temp_image_path} ({len(image_data)} bytes)")
+                
                 # Send with image
                 result = await gateway.send_image_message(
                     phone=phone,
-                    image_path=image_path,
+                    image_path=temp_image_path,
                     caption=message
                 )
             else:
