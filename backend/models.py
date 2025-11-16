@@ -29,7 +29,8 @@ class ScheduleUpdate(BaseModel):
     phone: Optional[str] = None
     message_html: Optional[str] = None
     message_md: Optional[str] = None
-    image_path: Optional[str] = None
+    image_base64: Optional[str] = None
+    image_filename: Optional[str] = None
     send_at: Optional[datetime] = None
     status: Optional[str] = None
 
