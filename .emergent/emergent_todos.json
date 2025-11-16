@@ -1,15 +1,11 @@
 [
   {
-    "content": "Create comprehensive MVP application with backend (gateway client, scheduler, CRUD endpoints, upload handling) and frontend (UI components, dashboard with tabs, schedule form, editor, history table)",
+    "content": "Test gateway with text message to test phone (6281290080025)",
     "status": "completed"
   },
   {
-    "content": "Test gateway with text message to test phone (6281290080025)",
-    "status": "in_progress"
-  },
-  {
     "content": "Test gateway with image message to test phone",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Test end-to-end scheduling and sending functionality",
