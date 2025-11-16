@@ -70,7 +70,7 @@ export const SimpleEditor = ({ initialContent = '', onChange }) => {
           variant="ghost"
           onClick={handleBold}
           data-testid="editor-bold-button"
-          title="Bold (**text**)"
+          title="Bold (*text*)"
         >
           <Bold className="h-4 w-4" />
         </Button>
