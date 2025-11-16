@@ -14,21 +14,15 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
     phone: editData?.phone || '120363291513749102@g.us',
     date: editData?.send_at ? new Date(editData.send_at).toISOString().split('T')[0] : '',
     time: editData?.send_at ? new Date(editData.send_at).toISOString().split('T')[1].substring(0, 5) : '00:00',
-    image: null
+    image: null,
+    message: editData?.message_html || ''
   });
   const [imagePreview, setImagePreview] = useState(editData?.image_path || null);
   const [loading, setLoading] = useState(false);
 
-  // Initialize Tiptap editor
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: editData?.message_html || '<p>Enter your devotion message here...</p>',
-    editorProps: {
-      attributes: {
-        class: 'prose prose-sm focus:outline-none min-h-[150px] max-w-none',
-      },
-    },
-  });
+  const handleEditorChange = (html) => {
+    setFormData({ ...formData, message: html });
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
