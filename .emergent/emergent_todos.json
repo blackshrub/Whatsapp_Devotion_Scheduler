@@ -1,11 +1,11 @@
 [
   {
     "content": "Install required backend dependencies (httpx for gateway API calls, APScheduler for scheduling)",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Install required frontend dependencies (lucide-react, framer-motion, sonner, date-fns, @tiptap/react, @tiptap/starter-kit, react-dropzone)",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Set up shadcn/ui components (Button, Input, Textarea, Select, Badge, Tabs, Table, Dialog, Sheet, Calendar, Tooltip) as .js files",
