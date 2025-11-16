@@ -102,7 +102,7 @@ export const SimpleEditor = ({ initialContent = '', onChange }) => {
         defaultValue={initialContent || ''}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder="Enter your devotion message here...
-Use **bold** for bold text
+Use *bold* for bold text
 Use _italic_ for italic text
 Use • for bullet points"
         className="min-h-[150px] font-mono text-sm"
@@ -110,7 +110,7 @@ Use • for bullet points"
       />
       
       <p className="text-xs text-[color:var(--fg-muted)]">
-        Use **bold**, _italic_, and • for formatting. It will be converted to WhatsApp markdown automatically.
+        Use *bold*, _italic_, and • for formatting. It will be converted to WhatsApp markdown automatically.
       </p>
     </div>
   );
