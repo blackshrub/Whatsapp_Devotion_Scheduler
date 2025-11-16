@@ -18,8 +18,6 @@ function App() {
   const [schedules, setSchedules] = useState([]);
   const [history, setHistory] = useState([]);
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
-  const [editorContent, setEditorContent] = useState('<p>Write your devotion message here...</p>');
-  const [loading, setLoading] = useState(false);
 
   // Fetch schedules
   const fetchSchedules = async () => {
