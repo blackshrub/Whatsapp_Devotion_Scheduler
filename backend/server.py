@@ -45,14 +45,19 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Debug route for testing gateway
+class DebugSendRequest(BaseModel):
+    phone: str
+    message: str
+    image_path: Optional[str] = None
+
 @api_router.post("/debug/send")
-async def debug_send(phone: str, message: str, image_path: Optional[str] = None):
+async def debug_send(request: DebugSendRequest):
     """Debug endpoint to test gateway"""
     try:
-        if image_path:
-            result = await gateway.send_image_message(phone, image_path, message)
+        if request.image_path:
+            result = await gateway.send_image_message(request.phone, request.image_path, request.message)
         else:
-            result = await gateway.send_text_message(phone, message)
+            result = await gateway.send_text_message(request.phone, request.message)
         return {"success": True, "result": result}
     except Exception as e:
         logger.error(f"Debug send error: {e}")
