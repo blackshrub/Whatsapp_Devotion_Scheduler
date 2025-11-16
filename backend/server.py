@@ -49,20 +49,41 @@ logger = logging.getLogger(__name__)
 class DebugSendRequest(BaseModel):
     phone: str
     message: str
-    image_path: Optional[str] = None
+    image_base64: Optional[str] = None
+    image_filename: Optional[str] = None
 
 @api_router.post("/debug/send")
 async def debug_send(request: DebugSendRequest):
     """Debug endpoint to test gateway"""
+    import base64
+    temp_image_path = None
+    
     try:
-        if request.image_path:
-            result = await gateway.send_image_message(request.phone, request.image_path, request.message)
+        if request.image_base64:
+            # Decode base64 and save to /tmp
+            image_filename = request.image_filename or "debug_image.jpg"
+            temp_image_path = f"/tmp/{image_filename}"
+            image_data = base64.b64decode(request.image_base64)
+            with open(temp_image_path, 'wb') as f:
+                f.write(image_data)
+            
+            result = await gateway.send_image_message(request.phone, temp_image_path, request.message)
         else:
             result = await gateway.send_text_message(request.phone, request.message)
+        
         return {"success": True, "result": result}
     except Exception as e:
         logger.error(f"Debug send error: {e}")
         return {"success": False, "error": str(e)}
+    finally:
+        # Cleanup temp file
+        if temp_image_path:
+            try:
+                import os
+                if os.path.exists(temp_image_path):
+                    os.remove(temp_image_path)
+            except:
+                pass
 
 # Upload endpoint
 @api_router.post("/uploads/image")
