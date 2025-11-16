@@ -67,40 +67,31 @@ async def debug_send(request: DebugSendRequest):
 # Upload endpoint
 @api_router.post("/uploads/image")
 async def upload_image(file: UploadFile = File(...)):
-    """Upload an image file"""
+    """Upload an image file and return base64 encoding"""
     try:
-        # Generate unique filename
-        ext = file.filename.split('.')[-1]
+        import base64
+        
+        # Read file content
+        file_content = await file.read()
+        
+        # Verify file is not empty
+        if len(file_content) == 0:
+            raise HTTPException(status_code=400, detail="File is empty")
+        
+        # Convert to base64
+        image_base64 = base64.b64encode(file_content).decode('utf-8')
+        
+        # Generate filename for reference
+        ext = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
         filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}"
-        file_path = UPLOADS_DIR / filename
         
-        # Save file
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        
-        # Ensure file is fully written to disk
-        import os
-        os.sync()
-        
-        # Verify file exists and is readable
-        if not os.path.exists(file_path):
-            raise HTTPException(status_code=500, detail="File upload failed: file not found after save")
-        
-        if not os.access(file_path, os.R_OK):
-            raise HTTPException(status_code=500, detail="File upload failed: file not readable")
-        
-        # Get file size to verify it's not empty
-        file_size = os.path.getsize(file_path)
-        if file_size == 0:
-            raise HTTPException(status_code=500, detail="File upload failed: file is empty")
-        
-        logger.info(f"Image uploaded successfully: {file_path} ({file_size} bytes)")
+        logger.info(f"Image uploaded and encoded: {filename} ({len(file_content)} bytes)")
         
         return {
             "success": True,
             "filename": filename,
-            "path": str(file_path),
-            "size": file_size
+            "image_base64": image_base64,
+            "size": len(file_content)
         }
     except HTTPException:
         raise
