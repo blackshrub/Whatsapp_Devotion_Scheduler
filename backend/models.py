@@ -7,7 +7,8 @@ class ScheduleCreate(BaseModel):
     phone: str = "120363291513749102@g.us"
     message_html: str
     message_md: Optional[str] = ""
-    image_path: Optional[str] = None
+    image_base64: Optional[str] = None
+    image_filename: Optional[str] = None
     send_at: datetime
 
 class Schedule(BaseModel):
@@ -15,7 +16,8 @@ class Schedule(BaseModel):
     phone: str
     message_html: str
     message_md: str
-    image_path: Optional[str] = None
+    image_base64: Optional[str] = None
+    image_filename: Optional[str] = None
     send_at: datetime
     status: str = "scheduled"  # scheduled, sending, sent, failed, canceled
     sent_at: Optional[datetime] = None
