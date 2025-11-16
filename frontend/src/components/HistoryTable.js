@@ -30,16 +30,21 @@ export const HistoryTable = ({ schedules, onRetry, onDelete, onView }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {schedules.map((schedule) => (
-            <TableRow key={schedule.id} data-testid="history-row">
-              <TableCell>
-                <div className="text-sm">
-                  <div>{format(new Date(schedule.send_at), 'yyyy-MM-dd')}</div>
-                  <div className="text-[color:var(--fg-muted)]">
-                    {format(new Date(schedule.send_at), 'HH:mm')}
+          {schedules.map((schedule) => {
+            // Convert UTC to GMT+7 for display
+            const utcDate = new Date(schedule.send_at);
+            const gmt7Date = new Date(utcDate.getTime() + (7 * 60 * 60 * 1000));
+            
+            return (
+              <TableRow key={schedule.id} data-testid="history-row">
+                <TableCell>
+                  <div className="text-sm">
+                    <div>{format(gmt7Date, 'yyyy-MM-dd')}</div>
+                    <div className="text-[color:var(--fg-muted)]">
+                      {format(gmt7Date, 'HH:mm')} GMT+7
+                    </div>
                   </div>
-                </div>
-              </TableCell>
+                </TableCell>
               <TableCell className="font-mono text-xs">
                 {schedule.phone}
               </TableCell>
