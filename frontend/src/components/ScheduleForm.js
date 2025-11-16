@@ -41,6 +41,12 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!editor) {
+      toast.error('Editor not initialized');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -54,6 +60,9 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
         imagePath = uploadRes.data.path;
       }
 
+      // Get HTML content from editor
+      const messageHtml = editor.getHTML();
+
       // User input is always in GMT+7 (Asia/Jakarta time)
       // Parse the date and time components
       const [year, month, day] = formData.date.split('-').map(Number);
@@ -66,7 +75,7 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
 
       const scheduleData = {
         phone: formData.phone,
-        message_html: formData.message,
+        message_html: messageHtml,
         image_path: imagePath,
         send_at: sendAt
       };
