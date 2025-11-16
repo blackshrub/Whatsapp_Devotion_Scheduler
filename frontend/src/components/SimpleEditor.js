@@ -14,9 +14,21 @@ export const SimpleEditor = ({ initialContent = '', onChange }) => {
   }, [initialContent]);
 
   const handleFormat = (command) => {
-    editorRef.current?.focus();
+    if (!editorRef.current) return;
+    
+    // Save current selection
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      editorRef.current.focus();
+      return;
+    }
+    
+    // Execute command
+    editorRef.current.focus();
     document.execCommand(command, false, null);
-    handleInput();
+    
+    // Trigger onChange
+    setTimeout(() => handleInput(), 10);
   };
 
   const handleInput = () => {
