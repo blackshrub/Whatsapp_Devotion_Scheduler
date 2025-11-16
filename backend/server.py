@@ -12,10 +12,10 @@ import pytz
 import shutil
 
 from models import Schedule, ScheduleCreate, ScheduleUpdate, BulkScheduleCreate
-from pydantic import BaseModel
 from markdown_converter import html_to_whatsapp_markdown
 from gateway import gateway
-from scheduler import DevotionScheduler
+from background_worker import BackgroundWorker
+from pydantic import BaseModel
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -35,8 +35,8 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Initialize scheduler
-scheduler = DevotionScheduler(db)
+# Initialize background worker
+worker = BackgroundWorker(db)
 
 # Configure logging
 logging.basicConfig(
@@ -90,7 +90,7 @@ async def upload_image(file: UploadFile = File(...)):
 # Schedule CRUD endpoints
 @api_router.post("/schedules", response_model=Schedule)
 async def create_schedule(schedule_data: ScheduleCreate):
-    """Create a new schedule"""
+    """Create a new schedule (pure database operation)"""
     try:
         # Convert HTML to markdown
         markdown = html_to_whatsapp_markdown(schedule_data.message_html)
@@ -101,7 +101,10 @@ async def create_schedule(schedule_data: ScheduleCreate):
         
         schedule = Schedule(**schedule_dict)
         
+        # Simple database insert - no tasks, no futures
         await db.schedules.insert_one(schedule.dict())
+        
+        logger.info(f"Created schedule {schedule.id} for {schedule.send_at}")
         return schedule
     except Exception as e:
         logger.error(f"Create schedule error: {e}")
@@ -109,7 +112,7 @@ async def create_schedule(schedule_data: ScheduleCreate):
 
 @api_router.post("/schedules/bulk", response_model=List[Schedule])
 async def create_bulk_schedules(bulk_data: BulkScheduleCreate):
-    """Create multiple schedules at once"""
+    """Create multiple schedules at once (pure database operation)"""
     try:
         schedules = []
         for schedule_data in bulk_data.schedules:
@@ -120,8 +123,10 @@ async def create_bulk_schedules(bulk_data: BulkScheduleCreate):
             schedules.append(schedule.dict())
         
         if schedules:
+            # Simple database insert - no tasks, no futures
             await db.schedules.insert_many(schedules)
         
+        logger.info(f"Created {len(schedules)} schedules via bulk add")
         return [Schedule(**s) for s in schedules]
     except Exception as e:
         logger.error(f"Bulk create error: {e}")
@@ -129,7 +134,7 @@ async def create_bulk_schedules(bulk_data: BulkScheduleCreate):
 
 @api_router.get("/schedules", response_model=List[Schedule])
 async def get_schedules(status: Optional[str] = None, limit: int = 100):
-    """Get all schedules with optional status filter"""
+    """Get all schedules with optional status filter (pure database read)"""
     try:
         query = {}
         if status:
@@ -144,7 +149,7 @@ async def get_schedules(status: Optional[str] = None, limit: int = 100):
 
 @api_router.get("/schedules/{schedule_id}", response_model=Schedule)
 async def get_schedule(schedule_id: str):
-    """Get a specific schedule"""
+    """Get a specific schedule (pure database read)"""
     schedule = await db.schedules.find_one({"id": schedule_id})
     if not schedule:
         raise HTTPException(status_code=404, detail="Schedule not found")
@@ -152,7 +157,7 @@ async def get_schedule(schedule_id: str):
 
 @api_router.put("/schedules/{schedule_id}", response_model=Schedule)
 async def update_schedule(schedule_id: str, update_data: ScheduleUpdate):
-    """Update a schedule"""
+    """Update a schedule (pure database update)"""
     try:
         # Get existing schedule
         schedule = await db.schedules.find_one({"id": schedule_id})
@@ -168,12 +173,14 @@ async def update_schedule(schedule_id: str, update_data: ScheduleUpdate):
         
         update_dict["updated_at"] = datetime.now(timezone.utc)
         
+        # Simple database update - no tasks, no futures
         await db.schedules.update_one(
             {"id": schedule_id},
             {"$set": update_dict}
         )
         
         updated_schedule = await db.schedules.find_one({"id": schedule_id})
+        logger.info(f"Updated schedule {schedule_id}")
         return Schedule(**updated_schedule)
     except HTTPException:
         raise
@@ -183,21 +190,25 @@ async def update_schedule(schedule_id: str, update_data: ScheduleUpdate):
 
 @api_router.delete("/schedules/{schedule_id}")
 async def delete_schedule(schedule_id: str):
-    """Delete a schedule"""
+    """Delete a schedule (pure database delete)"""
+    # Simple database delete - no task cancellation needed
     result = await db.schedules.delete_one({"id": schedule_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Schedule not found")
+    
+    logger.info(f"Deleted schedule {schedule_id}")
     return {"success": True}
 
 @api_router.post("/schedules/{schedule_id}/retry")
 async def retry_schedule(schedule_id: str):
-    """Retry sending a failed schedule"""
+    """Retry sending a failed schedule (pure database update)"""
     try:
         schedule = await db.schedules.find_one({"id": schedule_id})
         if not schedule:
             raise HTTPException(status_code=404, detail="Schedule not found")
         
-        # Reset status to scheduled and set new send time
+        # Reset status to scheduled and set new send time to now
+        # Background worker will pick it up in the next cycle
         await db.schedules.update_one(
             {"id": schedule_id},
             {
@@ -209,6 +220,7 @@ async def retry_schedule(schedule_id: str):
             }
         )
         
+        logger.info(f"Retry queued for schedule {schedule_id}")
         return {"success": True, "message": "Schedule queued for retry"}
     except HTTPException:
         raise
@@ -219,7 +231,7 @@ async def retry_schedule(schedule_id: str):
 # History endpoint (same as schedules but with filters)
 @api_router.get("/history", response_model=List[Schedule])
 async def get_history(status: Optional[str] = None, limit: int = 100):
-    """Get message history"""
+    """Get message history (pure database read)"""
     try:
         query = {}
         if status:
@@ -251,14 +263,17 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    # Start the scheduler
-    scheduler.start()
-    logger.info("Application started")
+    """Start the background worker in the same event loop"""
+    # Start background worker using asyncio.create_task
+    # This ensures it runs in the same event loop as FastAPI
+    await worker.start()
+    logger.info("Application started with background worker")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    # Shutdown scheduler
-    scheduler.shutdown()
+    """Shutdown the background worker and close connections"""
+    # Stop background worker
+    await worker.stop()
     # Close MongoDB connection
     client.close()
     logger.info("Application shut down")
