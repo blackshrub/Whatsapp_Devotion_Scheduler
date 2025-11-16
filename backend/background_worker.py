@@ -159,3 +159,13 @@ class BackgroundWorker:
                     }
                 }
             )
+        finally:
+            # Clean up temp image file
+            if temp_image_path:
+                try:
+                    import os
+                    if os.path.exists(temp_image_path):
+                        os.remove(temp_image_path)
+                        logger.info(f"Cleaned up temp image: {temp_image_path}")
+                except Exception as cleanup_error:
+                    logger.warning(f"Failed to cleanup temp image {temp_image_path}: {cleanup_error}")
