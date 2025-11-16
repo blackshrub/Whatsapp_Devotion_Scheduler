@@ -12,6 +12,7 @@ import pytz
 import shutil
 
 from models import Schedule, ScheduleCreate, ScheduleUpdate, BulkScheduleCreate
+from pydantic import BaseModel
 from markdown_converter import html_to_whatsapp_markdown
 from gateway import gateway
 from scheduler import DevotionScheduler
