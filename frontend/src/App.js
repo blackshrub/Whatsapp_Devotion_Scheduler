@@ -174,32 +174,38 @@ function App() {
                       No upcoming schedules
                     </p>
                   ) : (
-                    schedules.map((schedule) => (
-                      <div
-                        key={schedule.id}
-                        className="p-3 border border-[color:var(--border)] rounded-lg hover:bg-[color:var(--muted)] transition-colors"
-                        data-testid="schedule-item"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="text-sm font-medium">
-                              {format(new Date(schedule.send_at), 'MMM dd, yyyy HH:mm')}
+                    schedules.map((schedule) => {
+                      // Convert UTC time to GMT+7 for display
+                      const utcDate = new Date(schedule.send_at);
+                      const gmt7Date = new Date(utcDate.getTime() + (7 * 60 * 60 * 1000));
+                      
+                      return (
+                        <div
+                          key={schedule.id}
+                          className="p-3 border border-[color:var(--border)] rounded-lg hover:bg-[color:var(--muted)] transition-colors"
+                          data-testid="schedule-item"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="text-sm font-medium">
+                                {format(gmt7Date, 'MMM dd, yyyy HH:mm')} GMT+7
+                              </div>
+                              <div className="text-sm text-[color:var(--fg-muted)] truncate mt-1">
+                                {schedule.message_md || schedule.message_html}
+                              </div>
                             </div>
-                            <div className="text-sm text-[color:var(--fg-muted)] truncate mt-1">
-                              {schedule.message_md || schedule.message_html}
-                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDelete(schedule)}
+                              data-testid="schedule-delete-button"
+                            >
+                              Delete
+                            </Button>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleDelete(schedule)}
-                            data-testid="schedule-delete-button"
-                          >
-                            Delete
-                          </Button>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>
