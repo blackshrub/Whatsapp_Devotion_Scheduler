@@ -35,7 +35,18 @@ class DevotionScheduler:
     def check_and_send_messages(self):
         """Check for due messages and send them"""
         try:
-            asyncio.run(self._async_check_and_send())
+            # Get or create event loop for this thread
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_closed():
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            
+            # Run the async task
+            loop.run_until_complete(self._async_check_and_send())
         except Exception as e:
             logger.error(f"Error in scheduler: {e}")
     
