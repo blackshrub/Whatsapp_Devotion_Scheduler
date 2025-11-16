@@ -1,15 +1,11 @@
 [
   {
-    "content": "Install required frontend dependencies (lucide-react, framer-motion, sonner, date-fns, @tiptap/react, @tiptap/starter-kit, react-dropzone)",
+    "content": "Create comprehensive MVP application with backend (gateway client, scheduler, CRUD endpoints, upload handling) and frontend (UI components, dashboard with tabs, schedule form, editor, history table)",
     "status": "completed"
   },
   {
-    "content": "Create comprehensive MVP application with backend (gateway client, scheduler, CRUD endpoints, upload handling) and frontend (UI components, dashboard with tabs, schedule form, editor, history table)",
-    "status": "in_progress"
-  },
-  {
     "content": "Test gateway with text message to test phone (6281290080025)",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Test gateway with image message to test phone",
