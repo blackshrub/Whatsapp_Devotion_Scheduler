@@ -20,7 +20,12 @@ export const BulkAddModal = ({ open, onOpenChange, onSuccess }) => {
       const schedules = lines.map(line => {
         const [date, time, ...messageParts] = line.split('|');
         const message = messageParts.join('|').trim();
-        const sendAt = new Date(`${date.trim()}T${time.trim()}:00+07:00`).toISOString();
+        
+        // User input is in GMT+7, convert to UTC for storage
+        const [year, month, day] = date.trim().split('-').map(Number);
+        const [hours, minutes] = time.trim().split(':').map(Number);
+        const utcDate = new Date(Date.UTC(year, month - 1, day, hours - 7, minutes, 0));
+        const sendAt = utcDate.toISOString();
         
         return {
           phone: '120363291513749102@g.us',
