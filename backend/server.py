@@ -114,10 +114,9 @@ async def create_bulk_schedules(bulk_data: BulkScheduleCreate):
         schedules = []
         for schedule_data in bulk_data.schedules:
             markdown = html_to_whatsapp_markdown(schedule_data.message_html)
-            schedule = Schedule(
-                **schedule_data.dict(),
-                message_md=markdown
-            )
+            schedule_dict = schedule_data.dict()
+            schedule_dict['message_md'] = markdown
+            schedule = Schedule(**schedule_dict)
             schedules.append(schedule.dict())
         
         if schedules:
