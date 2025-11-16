@@ -19,6 +19,7 @@ export const ScheduleForm = ({ onSuccess, editData = null, onCancel = null }) =>
   });
   const [imagePreview, setImagePreview] = useState(editData?.image_path || null);
   const [loading, setLoading] = useState(false);
+  const [editorKey, setEditorKey] = useState(0);
 
   const handleEditorChange = (html) => {
     setFormData({ ...formData, message: html });
