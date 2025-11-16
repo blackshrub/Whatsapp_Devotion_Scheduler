@@ -1,20 +1,45 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Bold, Italic, List } from 'lucide-react';
 
 export const SimpleEditor = ({ initialContent = '', onChange }) => {
   const editorRef = useRef(null);
-  const [content, setContent] = useState(initialContent);
+  const isInitialized = useRef(false);
+
+  // Set initial content only once
+  useEffect(() => {
+    if (editorRef.current && !isInitialized.current) {
+      editorRef.current.innerHTML = initialContent || '<p>Enter your devotion message here...</p>';
+      isInitialized.current = true;
+    }
+  }, []);
 
   const handleFormat = (command) => {
     document.execCommand(command, false, null);
     editorRef.current?.focus();
+    // Trigger change after formatting
+    handleInput();
   };
 
   const handleInput = () => {
     const html = editorRef.current?.innerHTML || '';
-    setContent(html);
     onChange?.(html);
+  };
+
+  const handleKeyDown = (e) => {
+    // Ensure Enter key works properly
+    if (e.key === 'Enter') {
+      // Let default behavior handle it, but ensure we're not in a list
+      const selection = window.getSelection();
+      if (selection && selection.anchorNode) {
+        const parentElement = selection.anchorNode.parentElement;
+        // If not in a list, insert a line break
+        if (!parentElement?.closest('ul') && !parentElement?.closest('ol')) {
+          e.preventDefault();
+          document.execCommand('insertLineBreak', false, null);
+        }
+      }
+    }
   };
 
   return (
@@ -56,8 +81,9 @@ export const SimpleEditor = ({ initialContent = '', onChange }) => {
         contentEditable
         className="border border-[color:var(--border)] rounded-lg p-3 bg-white min-h-[150px] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary-600)]"
         onInput={handleInput}
-        dangerouslySetInnerHTML={{ __html: content }}
+        onKeyDown={handleKeyDown}
         data-testid="schedule-message-editor"
+        suppressContentEditableWarning
       />
       
       <p className="text-xs text-[color:var(--fg-muted)]">
