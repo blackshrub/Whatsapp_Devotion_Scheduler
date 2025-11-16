@@ -78,11 +78,32 @@ async def upload_image(file: UploadFile = File(...)):
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
+        # Ensure file is fully written to disk
+        import os
+        os.sync()
+        
+        # Verify file exists and is readable
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=500, detail="File upload failed: file not found after save")
+        
+        if not os.access(file_path, os.R_OK):
+            raise HTTPException(status_code=500, detail="File upload failed: file not readable")
+        
+        # Get file size to verify it's not empty
+        file_size = os.path.getsize(file_path)
+        if file_size == 0:
+            raise HTTPException(status_code=500, detail="File upload failed: file is empty")
+        
+        logger.info(f"Image uploaded successfully: {file_path} ({file_size} bytes)")
+        
         return {
             "success": True,
             "filename": filename,
-            "path": str(file_path)
+            "path": str(file_path),
+            "size": file_size
         }
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Upload error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
