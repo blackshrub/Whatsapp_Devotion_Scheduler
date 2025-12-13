@@ -129,6 +129,47 @@ function App() {
     }
   };
 
+  const handleImportData = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      const fileText = await file.text();
+      const importData = JSON.parse(fileText);
+
+      // Validate import data
+      if (!importData.schedules || !Array.isArray(importData.schedules)) {
+        toast.error('Invalid export file format');
+        return;
+      }
+
+      // Ask user if they want to replace existing data
+      const replaceExisting = window.confirm(
+        `Import ${importData.schedules.length} schedules?\n\n` +
+        `Click OK to REPLACE all existing data\n` +
+        `Click Cancel to ADD to existing data`
+      );
+
+      // Import to backend
+      const response = await axios.post(`${BACKEND_URL}/api/import`, {
+        schedules: importData.schedules,
+        replace_existing: replaceExisting
+      });
+
+      toast.success(response.data.message);
+      
+      // Refresh data
+      fetchSchedules();
+      fetchHistory();
+    } catch (error) {
+      console.error('Import error:', error);
+      toast.error(error.response?.data?.detail || 'Failed to import data');
+    }
+
+    // Reset file input
+    event.target.value = '';
+  };
+
   return (
     <div className="min-h-screen bg-[color:var(--bg)]" data-testid="page-dashboard">
       <Toaster position="top-right" />
