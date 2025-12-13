@@ -141,6 +141,16 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <h1 className="font-display text-lg font-semibold">Daily Devotion Scheduler</h1>
           <div className="flex items-center gap-4">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleExportData}
+              data-testid="export-button"
+              title="Export all schedules"
+            >
+              <Download className="h-4 w-4 mr-1" />
+              Export
+            </Button>
             <span className="text-sm text-[color:var(--fg-muted)]" data-testid="topbar-device">
               <Users className="inline h-4 w-4 mr-1" />
               Church Phone
