@@ -274,6 +274,34 @@ async def get_history(status: Optional[str] = None, limit: int = 100):
         logger.error(f"Get history error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Import endpoint
+class ImportData(BaseModel):
+    schedules: List[dict]
+    replace_existing: bool = False
+
+@api_router.post("/import")
+async def import_schedules(import_data: ImportData):
+    """Import schedules from exported JSON"""
+    try:
+        if import_data.replace_existing:
+            # Clear existing schedules
+            result = await db.schedules.delete_many({})
+            logger.info(f"Deleted {result.deleted_count} existing schedules")
+        
+        # Import schedules
+        if import_data.schedules:
+            await db.schedules.insert_many(import_data.schedules)
+            logger.info(f"Imported {len(import_data.schedules)} schedules")
+        
+        return {
+            "success": True,
+            "imported_count": len(import_data.schedules),
+            "message": f"Successfully imported {len(import_data.schedules)} schedules"
+        }
+    except Exception as e:
+        logger.error(f"Import error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Include the router in the main app
 app.include_router(api_router)
 
