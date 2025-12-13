@@ -89,6 +89,45 @@ function App() {
     alert(`Phone: ${schedule.phone}\nMessage: ${schedule.message_md}\nStatus: ${schedule.status}`);
   };
 
+  const handleExportData = async () => {
+    try {
+      // Fetch all schedules (both upcoming and history)
+      const allSchedules = await axios.get(`${BACKEND_URL}/api/schedules?limit=1000`);
+      
+      // Create export data object
+      const exportData = {
+        exported_at: new Date().toISOString(),
+        exported_from: window.location.origin,
+        total_schedules: allSchedules.data.length,
+        schedules: allSchedules.data,
+        metadata: {
+          timezone: 'GMT+7',
+          version: '1.0',
+          app_name: 'WhatsApp Daily Devotion Scheduler'
+        }
+      };
+
+      // Convert to JSON
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+      // Create download link
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `devotion_scheduler_export_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success(`Exported ${allSchedules.data.length} schedules successfully!`);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export data');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[color:var(--bg)]" data-testid="page-dashboard">
       <Toaster position="top-right" />
