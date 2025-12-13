@@ -18,6 +18,7 @@ function App() {
   const [schedules, setSchedules] = useState([]);
   const [history, setHistory] = useState([]);
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   // Fetch schedules
   const fetchSchedules = async () => {
