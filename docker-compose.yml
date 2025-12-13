@@ -1,0 +1,57 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: wa.gkbj.org-backend
+    restart: always
+    ports:
+      - "127.0.0.1:8002:8000"
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017
+      - DB_NAME=whatsapp_scheduler
+      - GATEWAY_BASE_URL=${GATEWAY_BASE_URL:-https://gateway.gkbj.org}
+      - GATEWAY_USER=${GATEWAY_USER:-}
+      - GATEWAY_PASS=${GATEWAY_PASS:-}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://wa.gkbj.org}
+    volumes:
+      - ./data/uploads:/app/uploads
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/schedules')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  mongodb:
+    image: mongo:7.0
+    container_name: wa.gkbj.org-mongodb
+    restart: always
+    volumes:
+      - ./data/mongodb:/data/db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.104.0.0/24

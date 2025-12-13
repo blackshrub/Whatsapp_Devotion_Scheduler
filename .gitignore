@@ -30,8 +30,10 @@ next-env.d.ts
 dist/
 dist
 
-# Environment files (comprehensive coverage)
-
+# Environment files
+.env
+.env.*
+*.env
 *token.json*
 *credentials.json*
 
@@ -41,16 +43,20 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 dump.rdb
+*.log
 
 # System files
 .DS_Store
 *.pem
+Thumbs.db
 
 # Python
 __pycache__/
-*pyc*
+*.pyc
+*.pyo
 venv/
 .venv/
+.pytest_cache/
 
 # Development tools
 chainlit.md
@@ -77,11 +83,8 @@ agenthub/agents/youtube/db
 .cache/
 
 # Mobile development
-android-sdk/ -e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
+android-sdk/
+
+# Docker data volumes (persistent data)
+data/mongodb/
+data/uploads/
