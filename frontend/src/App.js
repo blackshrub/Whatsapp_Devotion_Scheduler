@@ -8,7 +8,7 @@ import { BulkAddModal } from './components/BulkAddModal';
 import { HistoryTable } from './components/HistoryTable';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
-import { CalendarClock, History, Users } from 'lucide-react';
+import { CalendarClock, History, Users, Download } from 'lucide-react';
 import { format } from 'date-fns';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
