@@ -183,6 +183,23 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <h1 className="font-display text-lg font-semibold">Daily Devotion Scheduler</h1>
           <div className="flex items-center gap-4">
+            <input
+              type="file"
+              id="import-file"
+              accept=".json"
+              onChange={handleImportData}
+              style={{ display: 'none' }}
+            />
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => document.getElementById('import-file').click()}
+              data-testid="import-button"
+              title="Import schedules"
+            >
+              <Upload className="h-4 w-4 mr-1" />
+              Import
+            </Button>
             <Button
               size="sm"
               variant="ghost"
