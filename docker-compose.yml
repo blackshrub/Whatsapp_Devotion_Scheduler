@@ -4,7 +4,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: wa.gkbj.org-backend
-    restart: always
+    restart: unless-stopped
     ports:
       - "127.0.0.1:8002:8000"
     environment:
@@ -16,6 +16,7 @@ services:
       - CORS_ORIGINS=${CORS_ORIGINS:-https://wa.gkbj.org}
     volumes:
       - ./data/uploads:/app/uploads
+      - ./data/logs:/app/logs
     depends_on:
       mongodb:
         condition: service_healthy
@@ -32,9 +33,9 @@ services:
       start_period: 15s
 
   mongodb:
-    image: mongo:7.0
+    image: mongo:8.0
     container_name: wa.gkbj.org-mongodb
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./data/mongodb:/data/db
     logging:
