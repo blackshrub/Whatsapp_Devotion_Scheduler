@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import asyncio
 from pathlib import Path
 from typing import List, Optional
 from datetime import datetime, timezone
@@ -121,17 +122,24 @@ async def create_schedule(schedule_data: ScheduleCreate):
     try:
         # Convert HTML to markdown
         markdown = html_to_whatsapp_markdown(schedule_data.message_html)
-        
+
         # Create dict and set message_md
         schedule_dict = schedule_data.dict()
         schedule_dict['message_md'] = markdown
-        
+
         schedule = Schedule(**schedule_dict)
-        
-        # Simple database insert - no tasks, no futures
-        await db.schedules.insert_one(schedule.dict())
-        
+
+        # Simple database insert - use model_dump with mode='python' to preserve datetime objects
+        await db.schedules.insert_one(schedule.model_dump(mode='python'))
+
         logger.info(f"Created schedule {schedule.id} for {schedule.send_at}")
+
+        # If send_at is in the past, send immediately
+        now_utc = datetime.now(timezone.utc)
+        if schedule.send_at <= now_utc:
+            logger.info(f"Schedule {schedule.id} is past due, sending immediately")
+            asyncio.create_task(worker._send_schedule(schedule.dict()))
+
         return schedule
     except Exception as e:
         logger.error(f"Create schedule error: {e}")
@@ -147,13 +155,21 @@ async def create_bulk_schedules(bulk_data: BulkScheduleCreate):
             schedule_dict = schedule_data.dict()
             schedule_dict['message_md'] = markdown
             schedule = Schedule(**schedule_dict)
-            schedules.append(schedule.dict())
-        
+            schedules.append(schedule.model_dump(mode='python'))
+
         if schedules:
             # Simple database insert - no tasks, no futures
             await db.schedules.insert_many(schedules)
-        
+
         logger.info(f"Created {len(schedules)} schedules via bulk add")
+
+        # Send past-due schedules immediately
+        now_utc = datetime.now(timezone.utc)
+        for schedule_dict in schedules:
+            if schedule_dict['send_at'] <= now_utc:
+                logger.info(f"Schedule {schedule_dict['id']} is past due, sending immediately")
+                asyncio.create_task(worker._send_schedule(schedule_dict))
+
         return [Schedule(**s) for s in schedules]
     except Exception as e:
         logger.error(f"Bulk create error: {e}")
@@ -190,24 +206,31 @@ async def update_schedule(schedule_id: str, update_data: ScheduleUpdate):
         schedule = await db.schedules.find_one({"id": schedule_id})
         if not schedule:
             raise HTTPException(status_code=404, detail="Schedule not found")
-        
+
         # Prepare update
         update_dict = {k: v for k, v in update_data.dict().items() if v is not None}
-        
+
         # If message_html is updated, regenerate markdown
         if "message_html" in update_dict:
             update_dict["message_md"] = html_to_whatsapp_markdown(update_dict["message_html"])
-        
+
         update_dict["updated_at"] = datetime.now(timezone.utc)
-        
+
         # Simple database update - no tasks, no futures
         await db.schedules.update_one(
             {"id": schedule_id},
             {"$set": update_dict}
         )
-        
+
         updated_schedule = await db.schedules.find_one({"id": schedule_id})
         logger.info(f"Updated schedule {schedule_id}")
+
+        # If schedule is still "scheduled" and send_at is in the past, send immediately
+        now_utc = datetime.now(timezone.utc)
+        if updated_schedule['status'] == 'scheduled' and updated_schedule['send_at'] <= now_utc:
+            logger.info(f"Schedule {schedule_id} is past due, sending immediately")
+            asyncio.create_task(worker._send_schedule(updated_schedule))
+
         return Schedule(**updated_schedule)
     except HTTPException:
         raise
